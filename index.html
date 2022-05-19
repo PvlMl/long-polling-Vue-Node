@@ -1,0 +1,44 @@
+<script src="https://unpkg.com/vue@3"></script>
+<link rel="stylesheet" href="style.css" />
+<div id="app">
+  <div class="list">
+    <p><textarea rows="6" cols="50" class="textarea" v-model="text"></textarea></p>
+    <button @click="sendMessage">send</button>
+    <div class="item"
+    v-for="(mes, idx) in messages"
+    :key="idx"
+    >User message: {{mes}}</div>
+  </div>
+</div>
+  <script>
+    const app = Vue.createApp({
+      data() {
+        return {
+          messages: [],
+          text: ''
+        };
+      },
+      mounted() {
+        this.getMessages();
+      },
+      methods: {
+        getMessages() {
+          fetch("http://localhost:3000/get")
+            .then((res) => res.json())
+            .then((res) => this.messages.push(res.message))
+            .then(() => this.getMessages());
+        },
+        sendMessage() {
+          fetch("http://localhost:3000/send", {
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify({message: this.text})
+          });
+          this.text = '';
+        }
+      },
+    });
+    app.mount("#app");
+  </script>
